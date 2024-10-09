@@ -80,10 +80,14 @@ textarea {
         }
 
         .message {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
+    display: block; /* Osigurajte da je svaki element u novom redu */
+    margin: 5px 0; /* Razmak između poruka */
+    padding: 10px; /* Unutarnji razmak za bolju čitljivost */
+    border-radius: 5px; /* Zaobljeni rubovi */
+    word-wrap: break-word; /* Omogućuje prelamanje riječi */
+    max-width: 80%; /* Maksimalna širina poruke */
+}
+
 
 /* Poruke korisnika koji je prijavljen */
 .my-message {
@@ -473,7 +477,7 @@ textarea {
 
 
 
-        let isChatOpen = false; // Pratimo da li je chat otvoren
+        let isChatOpen = false; // Pratimo da li je chat otvoren               CHATTTTTTTTT
 let selectedUserName = ''; // Čuvamo ime trenutno odabranog korisnika
 
 document.getElementById('chat-link').addEventListener('click', async () => {
@@ -541,7 +545,6 @@ async function openChat(userName) {
 }
 
 
-// Funkcija za učitavanje historije poruka
 async function loadMessageHistory() {
     const messagesCollection = collection(db, 'poruke');
     const q = query(messagesCollection, 
@@ -553,24 +556,37 @@ async function loadMessageHistory() {
     const messagesDiv = document.getElementById('messages');
     messagesDiv.innerHTML = ''; // Očisti prethodne poruke
 
+    // Učitaj poruke u niz i sortiraj po timestamp-u
+    const messages = [];
     querySnapshot.forEach(doc => {
         const messageData = doc.data();
+        messages.push({
+            ...messageData,
+            id: doc.id // Sačuvaj id za kasniju upotrebu ako je potrebno
+        });
+    });
+
+    // Sortiraj poruke po timestamp-u
+    messages.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Prikaži sortirane poruke
+    messages.forEach(messageData => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
 
         // Proveri ko je pošiljalac i dodaj odgovarajuću klasu
         if (messageData.sender === username) {
-            messageElement.classList.add('sender'); // Klasa za logovanog korisnika
+            messageElement.classList.add('sender');
         } else {
-            messageElement.classList.add('recipient'); // Klasa za drugog korisnika
+            messageElement.classList.add('recipient');
         }
 
-        messageElement.innerText = `${messageData.sender}: ${messageData.message}`; // Formatiraj poruku
-        messagesDiv.appendChild(messageElement); // Dodaj poruku u div
+        messageElement.innerText = `${messageData.sender}: ${messageData.message}`;
+        messagesDiv.appendChild(messageElement);
     });
 }
 
-// Funkcija za slušanje novih poruka
+
 function listenForNewMessages() {
     const messagesCollection = collection(db, 'poruke');
     const q = query(messagesCollection, 
@@ -582,23 +598,37 @@ function listenForNewMessages() {
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = ''; // Očisti prethodne poruke
 
+        // Učitaj poruke u niz
+        const messages = [];
         querySnapshot.forEach(doc => {
             const messageData = doc.data();
+            messages.push({
+                ...messageData,
+                id: doc.id
+            });
+        });
+
+        // Sortiraj poruke po timestamp-u
+        messages.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Prikaži sortirane poruke
+        messages.forEach(messageData => {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
 
             // Proveri ko je pošiljalac i dodaj odgovarajuću klasu
             if (messageData.sender === username) {
-                messageElement.classList.add('sender'); // Klasa za logovanog korisnika
+                messageElement.classList.add('sender');
             } else {
-                messageElement.classList.add('recipient'); // Klasa za drugog korisnika
+                messageElement.classList.add('recipient');
             }
 
-            messageElement.innerText = `${messageData.sender}: ${messageData.message}`; // Formatiraj poruku
-            messagesDiv.appendChild(messageElement); // Dodaj poruku u div
+            messageElement.innerText = `${messageData.sender}: ${messageData.message}`;
+            messagesDiv.appendChild(messageElement);
         });
     });
 }
+
 
 
 
